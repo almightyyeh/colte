@@ -1312,9 +1312,8 @@ s1ap_mme_handle_enb_reset (
     printf("SMS: Got Here 2.0 \n");
     S1AP_ENB_INITIATED_RESET_REQ (message_p).num_ue = enb_association->nb_ue_associated;
     S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list = (s1_sig_conn_id_t*) calloc (enb_association->nb_ue_associated,
-
-    printf("SMS: Got Here 2.5 \n");
                                                                                           sizeof (*(S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list)));
+    printf("SMS: Got Here 2.5 \n");
     DevAssert(S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list != NULL);
     arg.message_p = message_p;
     hashtable_ts_apply_callback_on_elements(&enb_association->ue_coll, construct_s1ap_mme_full_reset_req, (void*)&arg, (void**) &message_p);
