@@ -1124,20 +1124,24 @@ mme_app_handle_enb_deregister_ind(const itti_s1ap_eNB_deregistered_ind_t const *
 void 
 mme_app_handle_enb_reset_req (const itti_s1ap_enb_initiated_reset_req_t const * enb_reset_req) 
 { 
-  
   MessageDef *message_p;
+  printf("SMS: mme_app_handle_enb_reset_req 0\n");
   OAILOG_DEBUG (LOG_MME_APP, " eNB Reset request received. eNB id = %d, reset_type  %d \n ", enb_reset_req->enb_id, enb_reset_req->s1ap_reset_type); 
   DevAssert (enb_reset_req->ue_to_reset_list != NULL);
+  printf("SMS: mme_app_handle_enb_reset_req 1\n");
   if (enb_reset_req->s1ap_reset_type == RESET_ALL) {
   // Full Reset. Trigger UE Context release release for all the connected UEs.
+  printf("SMS: mme_app_handle_enb_reset_req 2\n");
     for (int i = 0; i < enb_reset_req->num_ue; i++) {
       _mme_app_handle_s1ap_ue_context_release(*(enb_reset_req->ue_to_reset_list[i].mme_ue_s1ap_id),
                                             *(enb_reset_req->ue_to_reset_list[i].enb_ue_s1ap_id),
                                             enb_reset_req->enb_id, 
                                             S1AP_SCTP_SHUTDOWN_OR_RESET);
     }  
+  printf("SMS: mme_app_handle_enb_reset_req 2.5\n");
       
   } else { // Partial Reset
+    printf("SMS: mme_app_handle_enb_reset_req 3\n");
     for (int i = 0; i < enb_reset_req->num_ue; i++) {
       if (enb_reset_req->ue_to_reset_list[i].mme_ue_s1ap_id == NULL && 
                           enb_reset_req->ue_to_reset_list[i].enb_ue_s1ap_id == NULL) 
@@ -1148,7 +1152,7 @@ mme_app_handle_enb_reset_req (const itti_s1ap_enb_initiated_reset_req_t const * 
                                             enb_reset_req->enb_id, 
                                             S1AP_SCTP_SHUTDOWN_OR_RESET);
     } 
-      
+    printf("SMS: mme_app_handle_enb_reset_req 4\n");      
   }
   // Send Reset Ack to S1AP module
 
@@ -1163,6 +1167,7 @@ mme_app_handle_enb_reset_req (const itti_s1ap_enb_initiated_reset_req_t const * 
    * Send the same ue_reset_list to S1AP module to be used to construct S1AP Reset Ack message. This would be freed by
    * S1AP module.
    */
+  printf("SMS: mme_app_handle_enb_reset_req 5\n");      
   
   S1AP_ENB_INITIATED_RESET_ACK (message_p).ue_to_reset_list = enb_reset_req->ue_to_reset_list; 
   itti_send_msg_to_task (TASK_S1AP, INSTANCE_DEFAULT, message_p);
