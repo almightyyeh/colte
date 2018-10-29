@@ -1258,12 +1258,12 @@ s1ap_mme_handle_enb_reset (
     OAILOG_FUNC_RETURN (LOG_S1AP, RETURNok);
   }
 
-  printf("SMS: Got through checks \n", );
+  printf("SMS: Got through checks \n");
 
   // Check the reset type - partial_reset OR reset_all
   enb_reset_p = &message->msg.s1ap_ResetIEs;
 
-  printf("SMS: filled enb_reset_p \n", );
+  printf("SMS: filled enb_reset_p \n");
 
   switch (enb_reset_p->resetType.present) {
 
@@ -1296,7 +1296,7 @@ s1ap_mme_handle_enb_reset (
     }
   }
 
-  printf("SMS: Got Here 0 \n", );
+  printf("SMS: Got Here 0 \n");
 
   message_p = itti_alloc_new_message (TASK_S1AP, S1AP_ENB_INITIATED_RESET_REQ);
   AssertFatal (message_p != NULL, "itti_alloc_new_message Failed");
@@ -1306,57 +1306,57 @@ s1ap_mme_handle_enb_reset (
   S1AP_ENB_INITIATED_RESET_REQ (message_p).sctp_assoc_id = assoc_id;
   S1AP_ENB_INITIATED_RESET_REQ (message_p).sctp_stream_id = stream;
 
-  printf("SMS: Got Here 1 \n", );
+  printf("SMS: Got Here 1 \n");
 
   if (s1ap_reset_type == RESET_ALL) {
-    printf("SMS: Got Here 2.0 \n", );
+    printf("SMS: Got Here 2.0 \n");
     S1AP_ENB_INITIATED_RESET_REQ (message_p).num_ue = enb_association->nb_ue_associated;
     S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list = (s1_sig_conn_id_t*) calloc (enb_association->nb_ue_associated,
 
-    printf("SMS: Got Here 2.5 \n", );
+    printf("SMS: Got Here 2.5 \n");
                                                                                           sizeof (*(S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list)));
     DevAssert(S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list != NULL);
     arg.message_p = message_p;
     hashtable_ts_apply_callback_on_elements(&enb_association->ue_coll, construct_s1ap_mme_full_reset_req, (void*)&arg, (void**) &message_p);
-    printf("SMS: Got Here 3 \n", );
+    printf("SMS: Got Here 3 \n");
   } else {
-    printf("SMS: Got Here 4 \n", );
+    printf("SMS: Got Here 4 \n");
     // Partial Reset
     S1AP_ENB_INITIATED_RESET_REQ (message_p).num_ue = enb_reset_p->resetType.choice.partOfS1_Interface.list.count;
     S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list = (s1_sig_conn_id_t*)
                         calloc (enb_reset_p->resetType.choice.partOfS1_Interface.list.count, sizeof (*(S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list)));
-    printf("SMS: Got Here 5 \n", );
+    printf("SMS: Got Here 5 \n");
     DevAssert(S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list != NULL);
-    printf("SMS: Got Here 6 \n", );
+    printf("SMS: Got Here 6 \n");
     for (i = 0; i < enb_reset_p->resetType.choice.partOfS1_Interface.list.count; i++) {
-      printf("SMS: Got Here LOOP0 \n", );
+      printf("SMS: Got Here LOOP0 \n");
       s1_sig_conn_id_p = (S1ap_UE_associatedLogicalS1_ConnectionItem_t*) enb_reset_p->resetType.choice.partOfS1_Interface.list.array[i];
       DevAssert(s1_sig_conn_id_p != NULL);
-      printf("SMS: Got Here LOOP1 \n", );
+      printf("SMS: Got Here LOOP1 \n");
 
       if (s1_sig_conn_id_p->mME_UE_S1AP_ID != NULL) {
-        printf("SMS: Got Here LOOP2 \n", );
+        printf("SMS: Got Here LOOP2 \n");
         mme_ue_s1ap_id = (mme_ue_s1ap_id_t) *(s1_sig_conn_id_p->mME_UE_S1AP_ID);
-        printf("SMS: Got Here LOOP3 \n", );
+        printf("SMS: Got Here LOOP3 \n");
         if ((ue_ref_p = s1ap_is_ue_mme_id_in_list (mme_ue_s1ap_id)) != NULL) {
           if (s1_sig_conn_id_p->eNB_UE_S1AP_ID != NULL) {
             enb_ue_s1ap_id = (enb_ue_s1ap_id_t) *(s1_sig_conn_id_p->eNB_UE_S1AP_ID);
-          printf("SMS: Got Here LOOP4 \n", );
+          printf("SMS: Got Here LOOP4 \n");
             if (ue_ref_p->enb_ue_s1ap_id == (enb_ue_s1ap_id & ENB_UE_S1AP_ID_MASK)) {
-            printf("SMS: Got Here LOOP5 \n", );
+            printf("SMS: Got Here LOOP5 \n");
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].mme_ue_s1ap_id = &(ue_ref_p->mme_ue_s1ap_id);
               enb_ue_s1ap_id &= ENB_UE_S1AP_ID_MASK;
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].enb_ue_s1ap_id = &enb_ue_s1ap_id;
             } else {
               // mismatch in enb_ue_s1ap_id sent by eNB and stored in S1AP ue context in EPC. Abnormal case.
-              printf("SMS: Got Here LOOP6 \n", );
+              printf("SMS: Got Here LOOP6 \n");
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].mme_ue_s1ap_id = NULL;
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].enb_ue_s1ap_id = NULL;
               OAILOG_ERROR (LOG_S1AP, "Partial Reset Request:enb_ue_s1ap_id mismatch between id %d sent by eNB and id %d stored in epc for mme_ue_s1ap_id %d \n",
                           enb_ue_s1ap_id, ue_ref_p->enb_ue_s1ap_id, mme_ue_s1ap_id);
             }
           } else {
-            printf("SMS: Got Here LOOP7 \n", );
+            printf("SMS: Got Here LOOP7 \n");
             S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].mme_ue_s1ap_id = &(ue_ref_p->mme_ue_s1ap_id);
             S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].enb_ue_s1ap_id = NULL;
           }
@@ -1367,14 +1367,14 @@ s1ap_mme_handle_enb_reset (
         }
       } else {
         if (s1_sig_conn_id_p->eNB_UE_S1AP_ID != NULL) {
-          printf("SMS: Got Here LOOP8 \n", );
+          printf("SMS: Got Here LOOP8 \n");
           enb_ue_s1ap_id = (enb_ue_s1ap_id_t) *(s1_sig_conn_id_p->eNB_UE_S1AP_ID);
           if ((ue_ref_p = s1ap_is_ue_enb_id_in_list (enb_association, enb_ue_s1ap_id)) != NULL) {
-            printf("SMS: Got Here LOOP9 \n", );
+            printf("SMS: Got Here LOOP9 \n");
             enb_ue_s1ap_id &= ENB_UE_S1AP_ID_MASK;
             S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].enb_ue_s1ap_id = &enb_ue_s1ap_id;
             if (ue_ref_p->mme_ue_s1ap_id != INVALID_MME_UE_S1AP_ID) {
-              printf("SMS: Got Here LOOP10 \n", );
+              printf("SMS: Got Here LOOP10 \n");
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].mme_ue_s1ap_id = &(ue_ref_p->mme_ue_s1ap_id);
             } else {
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].mme_ue_s1ap_id = NULL;
@@ -1392,7 +1392,7 @@ s1ap_mme_handle_enb_reset (
       }
     }
   }
-  printf("SMS: Got Here LOOP11 \n", );
+  printf("SMS: Got Here LOOP11 \n");
   rc =  itti_send_msg_to_task (TASK_MME_APP, INSTANCE_DEFAULT, message_p);
   OAILOG_FUNC_RETURN (LOG_S1AP, rc);
 }
@@ -1413,7 +1413,7 @@ s1ap_handle_enb_initiated_reset_ack (
 
   int                                     rc = RETURNok;
 
-  printf("SMS: s1ap_handle_enb_initiated_reset_ack 0\n", );
+  printf("SMS: s1ap_handle_enb_initiated_reset_ack 0\n");
   OAILOG_FUNC_IN (LOG_S1AP);
 
   message.procedureCode = S1ap_ProcedureCode_id_Reset;
@@ -1422,9 +1422,9 @@ s1ap_handle_enb_initiated_reset_ack (
   s1ap_ResetAcknowledgeIEs_p->presenceMask = 0;
 
   if (enb_reset_ack_p->s1ap_reset_type == RESET_PARTIAL) {
-    printf("SMS: s1ap_handle_enb_initiated_reset_ack 1\n", );
+    printf("SMS: s1ap_handle_enb_initiated_reset_ack 1\n");
     DevAssert(enb_reset_ack_p->num_ue > 0);
-    printf("SMS: s1ap_handle_enb_initiated_reset_ack 2\n", );
+    printf("SMS: s1ap_handle_enb_initiated_reset_ack 2\n");
     s1ap_ResetAcknowledgeIEs_p->presenceMask |= S1AP_RESETACKNOWLEDGEIES_UE_ASSOCIATEDLOGICALS1_CONNECTIONLISTRESACK_PRESENT;
     s1ap_ResetAcknowledgeIEs_p->uE_associatedLogicalS1_ConnectionListResAck.s1ap_UE_associatedLogicalS1_ConnectionItemResAck.count = enb_reset_ack_p->num_ue;
     for (uint32_t i = 0; i < enb_reset_ack_p->num_ue; i++) {
@@ -1442,7 +1442,7 @@ s1ap_handle_enb_initiated_reset_ack (
       }
       sig_conn_list[0].iE_Extensions = NULL;
     }
-    printf("SMS: s1ap_handle_enb_initiated_reset_ack 3\n", );
+    printf("SMS: s1ap_handle_enb_initiated_reset_ack 3\n");
 
     ASN_SEQUENCE_ADD (&s1ap_ResetAcknowledgeIEs_p->uE_associatedLogicalS1_ConnectionListResAck.s1ap_UE_associatedLogicalS1_ConnectionItemResAck, sig_conn_list);
   }
@@ -1450,11 +1450,11 @@ s1ap_handle_enb_initiated_reset_ack (
     OAILOG_ERROR (LOG_S1AP, "Reset Ack encoding failed \n");
     OAILOG_FUNC_RETURN (LOG_S1AP, RETURNerror);
   }
-  printf("SMS: s1ap_handle_enb_initiated_reset_ack 4\n", );
+  printf("SMS: s1ap_handle_enb_initiated_reset_ack 4\n");
   bstring b = blk2bstr(buffer, length);
   rc = s1ap_mme_itti_send_sctp_request (&b, enb_reset_ack_p->sctp_assoc_id, enb_reset_ack_p->sctp_stream_id, INVALID_MME_UE_S1AP_ID);
   free_wrapper ((void**) &(enb_reset_ack_p->ue_to_reset_list));
-  printf("SMS: s1ap_handle_enb_initiated_reset_ack 5\n", );
+  printf("SMS: s1ap_handle_enb_initiated_reset_ack 5\n");
   OAILOG_FUNC_RETURN (LOG_S1AP, rc);
 }
 
