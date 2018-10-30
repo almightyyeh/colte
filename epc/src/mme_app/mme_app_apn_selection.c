@@ -58,7 +58,7 @@ struct apn_configuration_s   * mme_app_select_apn(ue_mm_context_t * const ue_con
   if (!ue_selected_apn) {
     OAILOG_DEBUG(LOG_MME_APP, "SMS: ue_selected_apn=NULL\n", ue_selected_apn);
   } else {
-    OAILOG_DEBUG(LOG_MME_APP, "SMS: ue_selected_apn=%s\n, len=%u", ue_selected_apn, ue_selected_apn->slen);
+    OAILOG_DEBUG(LOG_MME_APP, "SMS: ue_selected_apn=%s\n, len=%u\n", ue_selected_apn->data, ue_selected_apn->slen);
   }
 
   for (index = 0; index < ue_context->apn_config_profile.nb_apns; index++) {
