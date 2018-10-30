@@ -1335,11 +1335,11 @@ s1ap_mme_handle_enb_reset (
 
       if (s1_sig_conn_id_p->mME_UE_S1AP_ID != NULL) {
         printf("SMS: Got Here LOOP2 \n");
-        mme_ue_s1ap_id = (mme_ue_s1ap_id_t) *(s1_sig_conn_id_p->mME_UE_S1AP_ID);
+        mme_ue_s1ap_id = (mme_ue_s1ap_id_t) s1_sig_conn_id_p->mME_UE_S1AP_ID;
         printf("SMS: Got Here LOOP3 \n");
         if ((ue_ref_p = s1ap_is_ue_mme_id_in_list (mme_ue_s1ap_id)) != NULL) {
           if (s1_sig_conn_id_p->eNB_UE_S1AP_ID != NULL) {
-            enb_ue_s1ap_id = (enb_ue_s1ap_id_t) *(s1_sig_conn_id_p->eNB_UE_S1AP_ID);
+            enb_ue_s1ap_id = (enb_ue_s1ap_id_t) s1_sig_conn_id_p->eNB_UE_S1AP_ID;
           printf("SMS: Got Here LOOP4 \n");
             if (ue_ref_p->enb_ue_s1ap_id == (enb_ue_s1ap_id & ENB_UE_S1AP_ID_MASK)) {
             printf("SMS: Got Here LOOP5 \n");
@@ -1367,7 +1367,7 @@ s1ap_mme_handle_enb_reset (
       } else {
         if (s1_sig_conn_id_p->eNB_UE_S1AP_ID != NULL) {
           printf("SMS: Got Here LOOP8 \n");
-          enb_ue_s1ap_id = (enb_ue_s1ap_id_t) *(s1_sig_conn_id_p->eNB_UE_S1AP_ID);
+          enb_ue_s1ap_id = (enb_ue_s1ap_id_t) s1_sig_conn_id_p->eNB_UE_S1AP_ID;
           if ((ue_ref_p = s1ap_is_ue_enb_id_in_list (enb_association, enb_ue_s1ap_id)) != NULL) {
             printf("SMS: Got Here LOOP9 \n");
             enb_ue_s1ap_id &= ENB_UE_S1AP_ID_MASK;
