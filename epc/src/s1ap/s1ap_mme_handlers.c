@@ -1336,9 +1336,9 @@ s1ap_mme_handle_enb_reset (
 
       field = (S1ap_IE_t*) enb_reset_p->resetType.choice.partOfS1_Interface.list.array[0];
       DevAssert(field != NULL);
-      printf("field id = \n", field->id);
+      printf("field id = %x\n", field->id);
       if (field->id == 91) {
-        enb_ue_s1ap_id = (enb_ue_s1ap_id_t) field->value;
+        enb_ue_s1ap_id = (enb_ue_s1ap_id_t) *(field->value.buf);
         printf("enb_ue_s1ap_id = %u\n", enb_ue_s1ap_id);
       } else if (field->id == 91) {
 
