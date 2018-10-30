@@ -1337,6 +1337,7 @@ s1ap_mme_handle_enb_reset (
       field = (S1ap_IE_t*) enb_reset_p->resetType.choice.partOfS1_Interface.list.array[0];
       DevAssert(field != NULL);
       printf("field id = %x\n", field->id);
+
       if (field->id == 91) {
         uint8_t* ptr = (field->value.buf);
         ptr++;
@@ -1393,13 +1394,19 @@ s1ap_mme_handle_enb_reset (
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].mme_ue_s1ap_id = NULL;
             }
           } else {
-              OAILOG_ERROR (LOG_S1AP, "Partial Reset Request without any valid S1 signaling connection.Ignoring it \n");
+              OAILOG_ERROR (LOG_S1AP, "Partial Reset Request without any valid S1 signaling connection for ENB UE S1AP ID %u. Ignoring it \n", enb_ue_s1ap_id);
               // TBD - Here MME should send Error Indication as it is abnormal scenario.
-              OAILOG_FUNC_RETURN (LOG_S1AP, RETURNerror);
+
+              // SMS: Actually, we're just going to treat it like a TCP Reset:
+              // Delete all info (which doesn't exist) for conn and then send a Reset Response.
+              enb_ue_s1ap_id &= ENB_UE_S1AP_ID_MASK;
+              S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].enb_ue_s1ap_id = &enb_ue_s1ap_id;
+              // OAILOG_FUNC_RETURN (LOG_S1AP, RETURNerror);
           }
         } else {
-          OAILOG_ERROR (LOG_S1AP, "Partial Reset Request without any valid S1 signaling connection.Ignoring it \n");
+          OAILOG_ERROR (LOG_S1AP, "Partial Reset Request without any valid S1 signaling connection. Ignoring it \n");
           // TBD - Here MME should send Error Indication as it is abnormal scenario.
+          // SMS: No MME UE ID or ENB UE ID, what was even in this error message?!?
           OAILOG_FUNC_RETURN (LOG_S1AP, RETURNerror);
         }
       }
