@@ -1400,8 +1400,12 @@ s1ap_mme_handle_enb_reset (
               // SMS: Actually, we're just going to treat it like a TCP Reset:
               // Delete all info (which doesn't exist) for conn and then send a Reset Response.
               S1AP_ENB_INITIATED_RESET_REQ (message_p).num_ue = 1;
-              S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[0].mme_ue_s1ap_id = mme_ue_s1ap_id;
-              S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[0].enb_ue_s1ap_id = enb_ue_s1ap_id;
+              enb_ue_s1ap_id_t *enb_storage = malloc(sizeof (enb_ue_s1ap_id_t));
+              *enb_storage = enb_ue_s1ap_id;
+              mme_ue_s1ap_id_t *mme_storage = malloc(sizeof (mme_ue_s1ap_id_t));
+              *mme_storage = mme_ue_s1ap_id;
+              S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[0].mme_ue_s1ap_id = mme_storage;
+              S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[0].enb_ue_s1ap_id = enb_storage;
               // OAILOG_FUNC_RETURN (LOG_S1AP, RETURNerror);
           }
         } else {
