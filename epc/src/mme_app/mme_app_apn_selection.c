@@ -54,6 +54,7 @@ struct apn_configuration_s   * mme_app_select_apn(ue_mm_context_t * const ue_con
 
   context_identifier_t          default_context_identifier = ue_context->apn_config_profile.context_identifier;
   int                           index;
+  // bstring inet = cstr2bstr ("internet");
 
   if (!ue_selected_apn) {
     OAILOG_DEBUG(LOG_MME_APP, "SMS: ue_selected_apn=NULL\n", ue_selected_apn);
