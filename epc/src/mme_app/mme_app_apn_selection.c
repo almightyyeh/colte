@@ -54,7 +54,6 @@ struct apn_configuration_s   * mme_app_select_apn(ue_mm_context_t * const ue_con
 
   context_identifier_t          default_context_identifier = ue_context->apn_config_profile.context_identifier;
   int                           index;
-  bstring inet = cstr2bstr ("internet");
 
   if (!ue_selected_apn) {
     OAILOG_DEBUG(LOG_MME_APP, "SMS: ue_selected_apn=NULL\n", ue_selected_apn);
@@ -63,8 +62,9 @@ struct apn_configuration_s   * mme_app_select_apn(ue_mm_context_t * const ue_con
   }
 
   for (index = 0; index < ue_context->apn_config_profile.nb_apns; index++) {
-    OAILOG_DEBUG(LOG_MME_APP, "SMS: FORLOOP i=%d service_selection=%s\n", index, ue_context->apn_config_profile.apn_configuration[index].service_selection);
-    if (!ue_selected_apn || (binstr(ue_selected_apn, 0, inet) != BSTR_ERR)) {
+    // OAILOG_DEBUG(LOG_MME_APP, "SMS: FORLOOP i=%d service_selection=%s\n", index, ue_context->apn_config_profile.apn_configuration[index].service_selection);
+    // if (!ue_selected_apn || (binstr(ue_selected_apn, 0, inet) != BSTR_ERR)) {
+    if (!ue_selected_apn)
       /*
        * OK we got our default APN
        */
