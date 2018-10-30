@@ -55,12 +55,20 @@ struct apn_configuration_s   * mme_app_select_apn(ue_mm_context_t * const ue_con
   context_identifier_t          default_context_identifier = ue_context->apn_config_profile.context_identifier;
   int                           index;
 
+  if (!ue_selected_apn) {
+    OAILOG_DEBUG(LOG_MME_APP, "SMS: ue_selected_apn=NULL\n", ue_selected_apn);
+  } else {
+    OAILOG_DEBUG(LOG_MME_APP, "SMS: ue_selected_apn=%s\n", ue_selected_apn);    
+  }
+
   for (index = 0; index < ue_context->apn_config_profile.nb_apns; index++) {
+    OAILOG_DEBUG(LOG_MME_APP, "SMS: FORLOOP i=%d service_selection=%s\n", index, ue_context->apn_config_profile.apn_configuration[index].service_selection);
 
     if (!ue_selected_apn) {
       /*
        * OK we got our default APN
        */
+      OAILOG_DEBUG(LOG_MME_APP, "SMS: !ue_selected_apn\n");
       if (ue_context->apn_config_profile.apn_configuration[index].context_identifier == default_context_identifier) {
         OAILOG_DEBUG (LOG_MME_APP, "Selected APN %s for UE " IMSI_64_FMT "\n",
             ue_context->apn_config_profile.apn_configuration[index].service_selection,
@@ -71,6 +79,7 @@ struct apn_configuration_s   * mme_app_select_apn(ue_mm_context_t * const ue_con
       /*
        * OK we got the UE selected APN
        */
+      OAILOG_DEBUG(LOG_MME_APP, "SMS: else\n");
       if (biseqcaselessblk (ue_selected_apn,
           ue_context->apn_config_profile.apn_configuration[index].service_selection,
           strlen(ue_context->apn_config_profile.apn_configuration[index].service_selection)) == 1) {
