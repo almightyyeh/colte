@@ -1225,12 +1225,13 @@ s1ap_mme_handle_enb_reset (
   ue_description_t                        *ue_ref_p = NULL;
   enb_description_t                       *enb_association = NULL;
   s1ap_reset_type_t                       s1ap_reset_type;
+  S1ap_IE_t*                              field;
   S1ap_UE_associatedLogicalS1_ConnectionItem_t* s1_sig_conn_id_p = NULL;
   arg_s1ap_construct_enb_reset_req_t      arg = {0};
   uint32_t                                i = 0;
   int                                     rc = RETURNok;
-  mme_ue_s1ap_id_t  mme_ue_s1ap_id;
-  enb_ue_s1ap_id_t  enb_ue_s1ap_id;
+  mme_ue_s1ap_id_t                        mme_ue_s1ap_id = 0;
+  enb_ue_s1ap_id_t                        enb_ue_s1ap_id = 0;
 
 
   OAILOG_FUNC_IN (LOG_S1AP);
@@ -1328,19 +1329,31 @@ s1ap_mme_handle_enb_reset (
     DevAssert(S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list != NULL);
     printf("SMS: Got Here 6 \n");
     for (i = 0; i < enb_reset_p->resetType.choice.partOfS1_Interface.list.count; i++) {
+      if (i > 1) {
+        printf("SMS: WARNING!!! HOW CAN WE HANDLE MULTIPLE RESET VALS HERE?!? i=%d\n", i);
+      }
       printf("SMS: Got Here LOOP0 \n");
-      s1_sig_conn_id_p = (S1ap_UE_associatedLogicalS1_ConnectionItem_t*) enb_reset_p->resetType.choice.partOfS1_Interface.list.array[i];
-      DevAssert(s1_sig_conn_id_p != NULL);
+
+      field = (S1ap_IE_t*) enb_reset_p->resetType.choice.partOfS1_Interface.list.array[0];
+      DevAssert(field != NULL);
+      printf("field id = \n", field->id);
+      if (field->id == 91) {
+        enb_ue_s1ap_id = (enb_ue_s1ap_id_t) field->value;
+        printf("enb_ue_s1ap_id = %u\n", enb_ue_s1ap_id);
+      } else if (field->id == 91) {
+
+      } else {
+        printf("SMS: I HAVE NO IDEA WHAT'S GOING ON HERE WITH THE FIELD ID\n");
+      }
+
       printf("SMS: Got Here LOOP1 \n");
 
-      if (s1_sig_conn_id_p->mME_UE_S1AP_ID != NULL) {
+      if (mme_ue_s1ap_id != 0) {
         printf("SMS: Got Here LOOP2 \n");
-        mme_ue_s1ap_id = (mme_ue_s1ap_id_t) s1_sig_conn_id_p->mME_UE_S1AP_ID;
         printf("SMS: Got Here LOOP3 \n");
         if ((ue_ref_p = s1ap_is_ue_mme_id_in_list (mme_ue_s1ap_id)) != NULL) {
-          if (s1_sig_conn_id_p->eNB_UE_S1AP_ID != NULL) {
-            enb_ue_s1ap_id = (enb_ue_s1ap_id_t) s1_sig_conn_id_p->eNB_UE_S1AP_ID;
-          printf("SMS: Got Here LOOP4 \n");
+          if (enb_ue_s1ap_id != 0) {
+            printf("SMS: Got Here LOOP4 \n");
             if (ue_ref_p->enb_ue_s1ap_id == (enb_ue_s1ap_id & ENB_UE_S1AP_ID_MASK)) {
             printf("SMS: Got Here LOOP5 \n");
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[i].mme_ue_s1ap_id = &(ue_ref_p->mme_ue_s1ap_id);
@@ -1365,9 +1378,8 @@ s1ap_mme_handle_enb_reset (
           OAILOG_FUNC_RETURN (LOG_S1AP, RETURNerror);
         }
       } else {
-        if (s1_sig_conn_id_p->eNB_UE_S1AP_ID != NULL) {
+        if (enb_ue_s1ap_id != 0) {
           printf("SMS: Got Here LOOP8 \n");
-          enb_ue_s1ap_id = (enb_ue_s1ap_id_t) s1_sig_conn_id_p->eNB_UE_S1AP_ID;
           if ((ue_ref_p = s1ap_is_ue_enb_id_in_list (enb_association, enb_ue_s1ap_id)) != NULL) {
             printf("SMS: Got Here LOOP9 \n");
             enb_ue_s1ap_id &= ENB_UE_S1AP_ID_MASK;
