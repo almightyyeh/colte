@@ -1230,8 +1230,8 @@ s1ap_mme_handle_enb_reset (
   arg_s1ap_construct_enb_reset_req_t      arg = {0};
   uint32_t                                i = 0;
   int                                     rc = RETURNok;
-  mme_ue_s1ap_id_t                        mme_ue_s1ap_id = 0;
-  enb_ue_s1ap_id_t                        enb_ue_s1ap_id = 0;
+  uint8_t                                 mme_ue_s1ap_id = 0;
+  uint8_t                                 enb_ue_s1ap_id = 0;
 
 
   OAILOG_FUNC_IN (LOG_S1AP);
@@ -1338,10 +1338,12 @@ s1ap_mme_handle_enb_reset (
       DevAssert(field != NULL);
       printf("field id = %x\n", field->id);
       if (field->id == 91) {
-        enb_ue_s1ap_id = (enb_ue_s1ap_id_t) *(field->value.buf);
+        uint8_t* ptr = (field->value.buf);
+        ptr++;
+        enb_ue_s1ap_id = *ptr;
         printf("enb_ue_s1ap_id = %u\n", enb_ue_s1ap_id);
-      } else if (field->id == 91) {
-
+      // } else if (field->id == 90) {
+      //   mme_ue_s1ap_id here
       } else {
         printf("SMS: I HAVE NO IDEA WHAT'S GOING ON HERE WITH THE FIELD ID\n");
       }
