@@ -1422,6 +1422,19 @@ s1ap_mme_handle_enb_reset (
   OAILOG_FUNC_RETURN (LOG_S1AP, rc);
 }
 
+
+
+typedef struct spencer {
+  S1ap_ENB_UE_S1AP_ID_t id;
+  /*
+   * This type is extensible,
+   * possible extensions are below.
+   */
+  
+  /* Context for parsing across buffer boundaries */
+  asn_struct_ctx_t _asn_ctx;
+} spencer_t;
+
 //------------------------------------------------------------------------------
 int
 s1ap_handle_enb_initiated_reset_ack (
@@ -1434,6 +1447,7 @@ s1ap_handle_enb_initiated_reset_ack (
   S1ap_UE_associatedLogicalS1_ConnectionItem_t sig_conn_list[MAX_NUM_PARTIAL_S1_CONN_RESET] = {{0}};
   S1ap_MME_UE_S1AP_ID_t mme_ue_id[MAX_NUM_PARTIAL_S1_CONN_RESET] = {0};
   S1ap_ENB_UE_S1AP_ID_t enb_ue_id[MAX_NUM_PARTIAL_S1_CONN_RESET] = {0};
+  S1ap_IE_t newie;
 
 
   int                                     rc = RETURNok;
@@ -1453,23 +1467,46 @@ s1ap_handle_enb_initiated_reset_ack (
     s1ap_ResetAcknowledgeIEs_p->presenceMask |= S1AP_RESETACKNOWLEDGEIES_UE_ASSOCIATEDLOGICALS1_CONNECTIONLISTRESACK_PRESENT;
     s1ap_ResetAcknowledgeIEs_p->uE_associatedLogicalS1_ConnectionListResAck.s1ap_UE_associatedLogicalS1_ConnectionItemResAck.count = enb_reset_ack_p->num_ue;
     for (uint32_t i = 0; i < enb_reset_ack_p->num_ue; i++) {
-      if (enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id != NULL) {
-        mme_ue_id[i] = *(enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id);
-        sig_conn_list[0].mME_UE_S1AP_ID = &mme_ue_id[i];
-      } else {
-        sig_conn_list[0].mME_UE_S1AP_ID = NULL;
-      }
+      // if (enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id != NULL) {
+      //   mme_ue_id[i] = *(enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id);
+      //   // sig_conn_list[0]->id = &mme_ue_id[i];
+      // } else {
+      //   // sig_conn_list[0].mME_UE_S1AP_ID = NULL;
+      // // }
+      //   sig_conn_list[0]->id = 91;
+      //   sig_conn_list[0]->criticality = 0;
+      //   sig_conn_list[0]->value.buf[0] = enb_ue_id[i];
+      // }
+      // sig_conn_list[0].iE_Extensions = NULL;
+      
       if (enb_reset_ack_p->ue_to_reset_list[i].enb_ue_s1ap_id != NULL) {
         enb_ue_id[i] = *(enb_reset_ack_p->ue_to_reset_list[i].enb_ue_s1ap_id);
-        sig_conn_list[0].eNB_UE_S1AP_ID = &enb_ue_id[i];
+        spencer_t spencer_val;
+        spencer_val.id = enb_ue_id[i];
+        newie = s1ap_new_ie(S1ap_ProtocolIE_ID_id_UE_associatedLogicalS1_ConnectionItem,
+                            S1ap_Criticality_ignore,
+                            &asn_DEF_S1ap_UE_associatedLogicalS1_ConnectionItem,
+                            &spencer_val);
       } else {
-        sig_conn_list[0].eNB_UE_S1AP_ID = NULL;
+        enb_ue_id[i] = NULL;
       }
-      sig_conn_list[0].iE_Extensions = NULL;
-    }
-    printf("SMS: s1ap_handle_enb_initiated_reset_ack 3\n");
 
-    ASN_SEQUENCE_ADD (&s1ap_ResetAcknowledgeIEs_p->uE_associatedLogicalS1_ConnectionListResAck.s1ap_UE_associatedLogicalS1_ConnectionItemResAck, sig_conn_list);
+      if (enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id != NULL) {
+        mme_ue_id[i] = *(enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id);
+        spencer_t spencer_val;
+        spencer_val.id = mme_ue_id[i];
+        newie = s1ap_new_ie(S1ap_ProtocolIE_ID_id_UE_associatedLogicalS1_ConnectionItem,
+                            S1ap_Criticality_ignore,
+                            &asn_DEF_S1ap_UE_associatedLogicalS1_ConnectionItem,
+                            &spencer_val);
+      } else {
+        mme_ue_id[i] = NULL;
+      }
+    }
+
+    printf("SMS: s1ap_handle_enb_initiated_reset_ack 3\n");
+    ASN_SEQUENCE_ADD (&s1ap_ResetAcknowledgeIEs_p->uE_associatedLogicalS1_ConnectionListResAck.s1ap_UE_associatedLogicalS1_ConnectionItemResAck, newie);
+    printf("SMS: s1ap_handle_enb_initiated_reset_ack 3.5\n");
   }
   if (s1ap_mme_encode_pdu (&message, &buffer, &length) < 0) {
     OAILOG_ERROR (LOG_S1AP, "Reset Ack encoding failed \n");
