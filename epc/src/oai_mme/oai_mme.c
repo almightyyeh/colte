@@ -79,6 +79,30 @@
 #include "oai_mme.h"
 #include "pid_file.h"
 
+int spencer_func() {
+  MessageDef *message_p;
+  printf("spencer_func\n");
+
+  message_p = itti_alloc_new_message (TASK_MME_APP, S1AP_ENB_INITIATED_RESET_ACK);
+  DevAssert (message_p != NULL);
+  printf("spencer_func2\n");
+  memset ((void *)&message_p->ittiMsg.s1ap_enb_initiated_reset_ack, 0, sizeof (itti_s1ap_enb_initiated_reset_ack_t));
+  S1AP_ENB_INITIATED_RESET_ACK (message_p).s1ap_reset_type = 1;
+  S1AP_ENB_INITIATED_RESET_ACK (message_p).sctp_assoc_id = 1;
+  S1AP_ENB_INITIATED_RESET_ACK (message_p).sctp_stream_id = 1;
+  S1AP_ENB_INITIATED_RESET_ACK (message_p).num_ue = 1;
+
+  printf("spencer_func3\n");
+  
+  S1AP_ENB_INITIATED_RESET_ACK (message_p).ue_to_reset_list = (s1_sig_conn_id_t*) calloc(1, sizeof (*(S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list)));
+  (message_p).ue_to_reset_list[0].mme_ue_s1ap_id NULL;
+  (message_p).ue_to_reset_list[0].enb_ue_s1ap_id = malloc(sizeof enb_ue_s1ap_id_t);
+  *((message_p).ue_to_reset_list[0].enb_ue_s1ap_id) = 33;
+
+  itti_send_msg_to_task (TASK_S1AP, INSTANCE_DEFAULT, message_p);
+  printf("spencer_func4\n");
+}
+
 int
 main (
   int argc,
