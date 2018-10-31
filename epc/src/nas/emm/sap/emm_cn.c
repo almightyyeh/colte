@@ -210,8 +210,12 @@ static int _emm_cn_pdn_config_res (emm_cn_pdn_config_res_t * msg_pP)
     /*
      * Unfortunately we didn't find our default APN...
      */
+
+    pdn_connectivity_reject_msg * msg = calloc(1, sizeof(pdn_connectivity_reject_msg));
+
     OAILOG_INFO (LOG_NAS_ESM, "No suitable APN found ue_id=" MME_UE_S1AP_ID_FMT ")\n",ue_mm_context->mme_ue_s1ap_id);
     unlock_ue_contexts(ue_mm_context);
+    esm_send_pdn_connectivity_reject(emm_ctx->esm_ctx.esm_proc_data->pti, msg, 0x50);
     OAILOG_FUNC_RETURN (LOG_NAS_EMM, RETURNerror);
   }
 
