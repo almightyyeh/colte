@@ -94,10 +94,10 @@ int spencer_func() {
 
   printf("spencer_func3\n");
   
-  S1AP_ENB_INITIATED_RESET_ACK (message_p).ue_to_reset_list = (s1_sig_conn_id_t*) calloc(1, sizeof (*(S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list)));
-  (message_p).ue_to_reset_list[0].mme_ue_s1ap_id NULL;
-  (message_p).ue_to_reset_list[0].enb_ue_s1ap_id = malloc(sizeof enb_ue_s1ap_id_t);
-  *((message_p).ue_to_reset_list[0].enb_ue_s1ap_id) = 33;
+  // S1AP_ENB_INITIATED_RESET_ACK (message_p).ue_to_reset_list = (s1_sig_conn_id_t*) calloc(1, sizeof (*(S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list)));
+  // S1AP_ENB_INITIATED_RESET_ACK (message_p).ue_to_reset_list[0].mme_ue_s1ap_id NULL;
+  // S1AP_ENB_INITIATED_RESET_ACK (message_p).ue_to_reset_list[0].enb_ue_s1ap_id = malloc(sizeof enb_ue_s1ap_id_t);
+  // *((message_p).ue_to_reset_list[0].enb_ue_s1ap_id) = 33;
 
   itti_send_msg_to_task (TASK_S1AP, INSTANCE_DEFAULT, message_p);
   printf("spencer_func4\n");
