@@ -222,7 +222,7 @@ static int _emm_cn_pdn_config_res (emm_cn_pdn_config_res_t * msg_pP)
     emm_msg.primitive = EMMCN_PDN_CONNECTIVITY_FAIL;
     emm_msg.u.emm_cn_pdn_fail = fail_msg;
 
-    emm_cn_send(emm_msg);
+    emm_cn_send(&emm_msg);
     // emm_cn_t *fail_msg = malloc(sizeof(emm_cn_t));
     // _emm_cn_pdn_connectivity_fail(&fail_msg);
     // pdn_connectivity_reject_msg * msg = calloc(1, sizeof(pdn_connectivity_reject_msg));

@@ -57,7 +57,7 @@ struct apn_configuration_s   * mme_app_select_apn(ue_mm_context_t * const ue_con
   // bstring inet = cstr2bstr ("internet");
 
   if (!ue_selected_apn) {
-    OAILOG_DEBUG(LOG_MME_APP, "SMS: ue_selected_apn=NULL\n", ue_selected_apn);
+    OAILOG_DEBUG(LOG_MME_APP, "SMS: ue_selected_apn=NULL\n");
   } else {
     OAILOG_DEBUG(LOG_MME_APP, "SMS: ue_selected_apn=%s\n, len=%u\n", ue_selected_apn->data, ue_selected_apn->slen);
   }
