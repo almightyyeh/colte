@@ -222,9 +222,9 @@ static int _emm_cn_pdn_config_res (emm_cn_pdn_config_res_t * msg_pP)
     emm_msg->primitive = EMMCN_PDN_CONNECTIVITY_FAIL;
     emm_msg->u.emm_cn_pdn_fail = fail_msg;
 
-    printf("SMS WILL THIS WORK\n")
+    printf("SMS WILL THIS WORK\n");
     emm_cn_send(&emm_msg);
-    printf("SMS GOTHERE\n")
+    printf("SMS GOTHERE\n");
 
     // emm_cn_t *fail_msg = malloc(sizeof(emm_cn_t));
     // _emm_cn_pdn_connectivity_fail(&fail_msg);
