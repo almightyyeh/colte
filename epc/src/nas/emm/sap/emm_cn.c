@@ -218,9 +218,9 @@ static int _emm_cn_pdn_config_res (emm_cn_pdn_config_res_t * msg_pP)
     fail_msg->pti = emm_ctx->esm_ctx.esm_proc_data->pti;
     fail_msg->cause = ESM_CAUSE_SERVICE_OPTION_NOT_SUPPORTED;
 
-    emm_cn_t emm_msg;
-    emm_msg.primitive = EMMCN_PDN_CONNECTIVITY_FAIL;
-    emm_msg.u.emm_cn_pdn_fail = fail_msg;
+    emm_cn_t *emm_msg = malloc(sizeof(emm_cn_t));;
+    emm_msg->primitive = EMMCN_PDN_CONNECTIVITY_FAIL;
+    emm_msg->u.emm_cn_pdn_fail = fail_msg;
 
     emm_cn_send(&emm_msg);
     // emm_cn_t *fail_msg = malloc(sizeof(emm_cn_t));
