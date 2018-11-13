@@ -101,6 +101,7 @@ int spencer_func() {
 
   itti_send_msg_to_task (TASK_S1AP, INSTANCE_DEFAULT, message_p);
   printf("spencer_func4\n");
+  return 0;
 }
 
 int
