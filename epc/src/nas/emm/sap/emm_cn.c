@@ -214,8 +214,24 @@ static int _emm_cn_pdn_config_res (emm_cn_pdn_config_res_t * msg_pP)
     pdn_connectivity_reject_msg * msg = calloc(1, sizeof(pdn_connectivity_reject_msg));
 
     OAILOG_INFO (LOG_NAS_ESM, "No suitable APN found ue_id=" MME_UE_S1AP_ID_FMT ")\n",ue_mm_context->mme_ue_s1ap_id);
+    OAILOG_INFO (LOG_NAS_ESM, "SMS: SENDING PDN CONNECTIVITY REJECT\n");
+
+    // emm_cn_t *fail_msg = malloc(sizeof(emm_cn_t));
+    emm_cn_t fail_msg;
+    fail_msg.primitive = EMMCN_PDN_CONNECTIVITY_FAIL;
+    fail_msg.u.emm_cn_pdn_fail;
+
+    emm_cn_send(fail_msg);
+
+    emm_cn_pdn_fail_t fail_msg = malloc(sizeof(emm_cn_pdn_fail_t));
+    fail_msg.ue_id = msg_pP->ue_id;
+    fail_msg.pti = emm_ctx->esm_ctx.esm_proc_data->pti;
+    fail_msg.cause = ESM_CAUSE_SERVICE_OPTION_NOT_SUPPORTED;
+
+    _emm_cn_pdn_connectivity_fail(&fail_msg);
+    // esm_send_pdn_connectivity_reject(emm_ctx->esm_ctx.esm_proc_data->pti, msg, 0x50);
+
     unlock_ue_contexts(ue_mm_context);
-    esm_send_pdn_connectivity_reject(emm_ctx->esm_ctx.esm_proc_data->pti, msg, 0x50);
     OAILOG_FUNC_RETURN (LOG_NAS_EMM, RETURNerror);
   }
 
