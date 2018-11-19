@@ -1225,8 +1225,8 @@ s1ap_mme_handle_enb_reset (
   ue_description_t                        *ue_ref_p = NULL;
   enb_description_t                       *enb_association = NULL;
   s1ap_reset_type_t                       s1ap_reset_type;
-  S1ap_IE_t*                              field;
-  S1ap_UE_associatedLogicalS1_ConnectionItem_t* s1_sig_conn_id_p = NULL;
+  S1ap_IE_t*                              field = NULL;
+  // S1ap_UE_associatedLogicalS1_ConnectionItem_t* s1_sig_conn_id_p = NULL;
   arg_s1ap_construct_enb_reset_req_t      arg = {0};
   uint32_t                                i = 0;
   int                                     rc = RETURNok;
@@ -1330,18 +1330,16 @@ s1ap_mme_handle_enb_reset (
     printf("SMS: Got Here 6 \n");
     for (i = 0; i < enb_reset_p->resetType.choice.partOfS1_Interface.list.count; i++) {
       if (i > 1) {
-        printf("SMS: WARNING!!! HOW CAN WE HANDLE MULTIPLE RESET VALS HERE?!? i=%d\n", i);
+        printf("SMS: WARNING!!! DON'T KNOW HOW TO HANDLE MULTIPLE RESET VALS HERE!!! i=%d\n", i);
       }
       printf("SMS: Got Here LOOP0 \n");
 
-      field = (S1ap_IE_t*) enb_reset_p->resetType.choice.partOfS1_Interface.list.array[0];
+      field = (S1ap_IE_t*) enb_reset_p->resetType.choice.partOfS1_Interface.list.array[i];
       DevAssert(field != NULL);
-      printf("field id = %x\n", field->id);
 
       if (field->id == 91) {
-        uint8_t* ptr = (field->value.buf);
-        ptr++;
-        enb_ue_s1ap_id = *ptr;
+        uint8_t val = (uint8_t) field->value.buf[1];
+        enb_ue_s1ap_id = val;
         printf("enb_ue_s1ap_id = %u\n", enb_ue_s1ap_id);
       // } else if (field->id == 90) {
       //   mme_ue_s1ap_id here
@@ -1399,11 +1397,20 @@ s1ap_mme_handle_enb_reset (
 
               // SMS: Actually, we're just going to treat it like a TCP Reset:
               // Delete all info (which doesn't exist) for conn and then send a Reset Response.
+              mme_ue_s1ap_id_t *mme_storage = NULL;
+              enb_ue_s1ap_id_t *enb_storage = NULL;
+
+              if (enb_ue_s1ap_id != 0) {
+                enb_storage = malloc(sizeof (enb_ue_s1ap_id_t));
+                *enb_storage = enb_ue_s1ap_id;
+              }
+
+              if (mme_ue_s1ap_id != 0) {
+                mme_storage = malloc(sizeof (mme_ue_s1ap_id_t));
+                *mme_storage = mme_ue_s1ap_id;
+              }
+
               S1AP_ENB_INITIATED_RESET_REQ (message_p).num_ue = 1;
-              enb_ue_s1ap_id_t *enb_storage = malloc(sizeof (enb_ue_s1ap_id_t));
-              *enb_storage = enb_ue_s1ap_id;
-              mme_ue_s1ap_id_t *mme_storage = malloc(sizeof (mme_ue_s1ap_id_t));
-              *mme_storage = mme_ue_s1ap_id;
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[0].mme_ue_s1ap_id = mme_storage;
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[0].enb_ue_s1ap_id = enb_storage;
               // OAILOG_FUNC_RETURN (LOG_S1AP, RETURNerror);
@@ -1444,7 +1451,8 @@ s1ap_handle_enb_initiated_reset_ack (
   uint32_t                                length = 0;
   s1ap_message                            message = {0};
   S1ap_ResetAcknowledgeIEs_t * s1ap_ResetAcknowledgeIEs_p = NULL;
-  S1ap_UE_associatedLogicalS1_ConnectionItem_t sig_conn_list[MAX_NUM_PARTIAL_S1_CONN_RESET] = {{0}};
+  // S1ap_UE_associatedLogicalS1_ConnectionItem_t sig_conn_list[MAX_NUM_PARTIAL_S1_CONN_RESET] = {{0}};
+  S1ap_IE_t conn_list[MAX_NUM_PARTIAL_S1_CONN_RESET] = {{0}};;
   S1ap_MME_UE_S1AP_ID_t mme_ue_id[MAX_NUM_PARTIAL_S1_CONN_RESET] = {0};
   S1ap_ENB_UE_S1AP_ID_t enb_ue_id[MAX_NUM_PARTIAL_S1_CONN_RESET] = {0};
   S1ap_IE_t newie;
@@ -1467,45 +1475,38 @@ s1ap_handle_enb_initiated_reset_ack (
     s1ap_ResetAcknowledgeIEs_p->presenceMask |= S1AP_RESETACKNOWLEDGEIES_UE_ASSOCIATEDLOGICALS1_CONNECTIONLISTRESACK_PRESENT;
     s1ap_ResetAcknowledgeIEs_p->uE_associatedLogicalS1_ConnectionListResAck.s1ap_UE_associatedLogicalS1_ConnectionItemResAck.count = enb_reset_ack_p->num_ue;
     for (uint32_t i = 0; i < enb_reset_ack_p->num_ue; i++) {
-      // if (enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id != NULL) {
-      //   mme_ue_id[i] = *(enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id);
-      //   // sig_conn_list[0]->id = &mme_ue_id[i];
-      // } else {
-      //   // sig_conn_list[0].mME_UE_S1AP_ID = NULL;
-      // // }
-      //   sig_conn_list[0]->id = 91;
-      //   sig_conn_list[0]->criticality = 0;
-      //   sig_conn_list[0]->value.buf[0] = enb_ue_id[i];
-      // }
-      // sig_conn_list[0].iE_Extensions = NULL;
-      
+
       if (enb_reset_ack_p->ue_to_reset_list[i].enb_ue_s1ap_id != NULL) {
         enb_ue_id[i] = *(enb_reset_ack_p->ue_to_reset_list[i].enb_ue_s1ap_id);
-        spencer_t spencer_val;
-        spencer_val.id = enb_ue_id[i];
-        newie = s1ap_new_ie(S1ap_ProtocolIE_ID_id_UE_associatedLogicalS1_ConnectionItem,
-                            S1ap_Criticality_ignore,
-                            &asn_DEF_S1ap_UE_associatedLogicalS1_ConnectionItem,
-                            &spencer_val);
+
+        conn_list[i].id = S1ap_ProtocolIE_ID_id_UE_associatedLogicalS1_ConnectionItem; //91
+        conn_list[i].criticality = S1ap_Criticality_ignore;
+        conn_list[i].value.buf = malloc(2);
+        conn_list[i].value.buf[0] = 0x20;
+        conn_list[i].value.buf[1] = enb_ue_id[i];
+        conn_list[i].value.size = 2;
       } else {
         enb_ue_id[i] = NULL;
       }
 
-      if (enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id != NULL) {
-        mme_ue_id[i] = *(enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id);
-        spencer_t spencer_val;
-        spencer_val.id = mme_ue_id[i];
-        newie = s1ap_new_ie(S1ap_ProtocolIE_ID_id_UE_associatedLogicalS1_ConnectionItem,
-                            S1ap_Criticality_ignore,
-                            &asn_DEF_S1ap_UE_associatedLogicalS1_ConnectionItem,
-                            &spencer_val);
-      } else {
-        mme_ue_id[i] = NULL;
-      }
+      mme_ue_id[i] = NULL;
+      // if (enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id != NULL) {
+      //   // SMS: HOW DO WE HANDLE THIS WITH RESPECT TO THE CONN_LIST?!?!?!?
+      //   mme_ue_id[i] = *(enb_reset_ack_p->ue_to_reset_list[i].mme_ue_s1ap_id);
+      //   spencer_t spencer_val;
+      //   spencer_val.id = mme_ue_id[i];
+      //   newie = s1ap_new_ie(S1ap_ProtocolIE_ID_id_UE_associatedLogicalS1_ConnectionItem,
+      //                       S1ap_Criticality_ignore,
+      //                       &asn_DEF_S1ap_UE_associatedLogicalS1_ConnectionItem,
+      //                       &spencer_val);
+      // } else {
+      //   mme_ue_id[i] = NULL;
+      // }
     }
 
     printf("SMS: s1ap_handle_enb_initiated_reset_ack 3\n");
-    ASN_SEQUENCE_ADD (&s1ap_ResetAcknowledgeIEs_p->uE_associatedLogicalS1_ConnectionListResAck.s1ap_UE_associatedLogicalS1_ConnectionItemResAck, newie);
+    s1ap_ResetAcknowledgeIEs_p->uE_associatedLogicalS1_ConnectionListResAck.s1ap_UE_associatedLogicalS1_ConnectionItemResAck.count = 0;
+    ASN_SEQUENCE_ADD (&s1ap_ResetAcknowledgeIEs_p->uE_associatedLogicalS1_ConnectionListResAck.s1ap_UE_associatedLogicalS1_ConnectionItemResAck, conn_list);
     printf("SMS: s1ap_handle_enb_initiated_reset_ack 3.5\n");
   }
   if (s1ap_mme_encode_pdu (&message, &buffer, &length) < 0) {
@@ -1514,6 +1515,11 @@ s1ap_handle_enb_initiated_reset_ack (
   }
   printf("SMS: s1ap_handle_enb_initiated_reset_ack 4\n");
   bstring b = blk2bstr(buffer, length);
+
+  for (int i = 0; i < length; i++) {
+    printf(" %02x", buffer[i]);
+  }
+
   rc = s1ap_mme_itti_send_sctp_request (&b, enb_reset_ack_p->sctp_assoc_id, enb_reset_ack_p->sctp_stream_id, INVALID_MME_UE_S1AP_ID);
   free_wrapper ((void**) &(enb_reset_ack_p->ue_to_reset_list));
   printf("SMS: s1ap_handle_enb_initiated_reset_ack 5\n");
