@@ -1397,18 +1397,11 @@ s1ap_mme_handle_enb_reset (
 
               // SMS: Actually, we're just going to treat it like a TCP Reset:
               // Delete all info (which doesn't exist) for conn and then send a Reset Response.
-              mme_ue_s1ap_id_t *mme_storage = NULL;
-              enb_ue_s1ap_id_t *enb_storage = NULL;
+              mme_ue_s1ap_id_t * mme_storage = malloc(sizeof (enb_ue_s1ap_id_t));
+              enb_ue_s1ap_id_t * enb_storage = malloc(sizeof (enb_ue_s1ap_id_t));
 
-              if (enb_ue_s1ap_id != 0) {
-                enb_storage = malloc(sizeof (enb_ue_s1ap_id_t));
-                *enb_storage = enb_ue_s1ap_id;
-              }
-
-              if (mme_ue_s1ap_id != 0) {
-                mme_storage = malloc(sizeof (mme_ue_s1ap_id_t));
-                *mme_storage = mme_ue_s1ap_id;
-              }
+              *mme_storage = mme_ue_s1ap_id;
+              *enb_storage = enb_ue_s1ap_id;
 
               S1AP_ENB_INITIATED_RESET_REQ (message_p).num_ue = 1;
               S1AP_ENB_INITIATED_RESET_REQ (message_p).ue_to_reset_list[0].mme_ue_s1ap_id = mme_storage;
